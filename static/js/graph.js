@@ -8,6 +8,7 @@ function makeGraphs(error, salaryData) {
     //to convert data to int as necessary for charts
     salaryData.forEach(function(d) {
         d.salary = parseInt(d.salary);
+        d.yrs_since_phd = parseInt(d["yrs.since.phd"]);
         d.yrs_service = parseInt(d["yrs.service"]);
     })
 
@@ -18,6 +19,7 @@ function makeGraphs(error, salaryData) {
     show_average_salaries(ndx);
     show_rank_distribution(ndx);
     show_service_to_salary_correlation(ndx);
+    show_phd_to_salary_correlation(ndx);
 
     dc.renderAll();
 }
@@ -216,5 +218,40 @@ function show_service_to_salary_correlation(ndx) {
         .colors(genderColors)
         .dimension(experienceDim)
         .group(experienceSalaryGroup)
+        .margins({top: 10, right: 50, bottom: 75, left: 75});
+}
+
+function show_phd_to_salary_correlation(ndx) {
+    var pDim = ndx.dimension(dc.pluck('yrs_since_phd'));
+    var phdDim = ndx.dimension(function(d) {
+        return [d.yrs_since_phd, d.salary,d.rank, d.sex]; //added sex so that colors can  display and rank for tooltip
+    });
+    
+    var genderColors = d3.scale.ordinal()
+        .domain(['Fem,ale', 'Male'])
+        .range(['pink', 'blue']);
+    
+    var phdSalaryGroup = phdDim.group();
+    var minPhd = pDim.bottom(1)[0].yrs_since_phd;
+    var maxPhd = pDim.top(1)[0].yrs_since_phd;
+    
+    dc.scatterPlot('#phd-salary')
+        .width(800)
+        .height(400)
+        .x(d3.scale.linear().domain([minPhd, maxPhd]))
+        .brushOn(false)
+        .symbolSize(8) //size of dots
+        .clipPadding(10)//leaves room near the top
+        .yAxisLabel('Salary')
+        .xAxisLabel('Years Since PhD')
+        .title(function(d) {
+            return d.key[2] + ' earned ' + d.key[1]; //displays rank and salary as tool tip over dots
+        })
+        .colorAccessor(function(d) {
+            return d.key[3];
+        })
+        .colors(genderColors)
+        .dimension(phdDim)
+        .group(phdSalaryGroup)
         .margins({top: 10, right: 50, bottom: 75, left: 75});
 }
