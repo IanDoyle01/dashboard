@@ -8,7 +8,7 @@ function makeGraphs(error, salaryData) {
     //to convert data to int as necessary for charts
     salaryData.forEach(function(d) {
         d.salary = parseInt(d.salary);
-        d.yrs_service = parseInt(d["yrs_service"]);
+        d.yrs_service = parseInt(d["yrs.service"]);
     })
 
     show_discipline_selector(ndx);
