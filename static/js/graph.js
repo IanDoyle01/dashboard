@@ -187,8 +187,13 @@ function show_rank_distribution(ndx) {
 function show_service_to_salary_correlation(ndx) {
     var eDim = ndx.dimension(dc.pluck('yrs_service'));
     var experienceDim = ndx.dimension(function(d) {
-        return [d.yrs_service, d.salary];
+        return [d.yrs_service, d.salary,d.rank, d.sex]; //added sex so that colors can  display and rank for tooltip
     });
+    
+    var genderColors = d3.scale.ordinal()
+        .domain(['Fem,ale', 'Male'])
+        .range(['pink', 'blue']);
+    
     var experienceSalaryGroup = experienceDim.group();
     var minExperience = eDim.bottom(1)[0].yrs_service;
     var maxExperience = eDim.top(1)[0].yrs_service;
@@ -200,10 +205,15 @@ function show_service_to_salary_correlation(ndx) {
         .brushOn(false)
         .symbolSize(8) //size of dots
         .clipPadding(10)//leaves room near the top
-        .yAxisLabel('Years of Service')
+        .yAxisLabel('Salary')
+        .xAxisLabel('Years of Service')
         .title(function(d) {
-            return 'Earned' + d.key[1]; //displays salary as tool tip over dots
+            return d.key[2] + ' earned ' + d.key[1]; //displays rank and salary as tool tip over dots
         })
+        .colorAccessor(function(d) {
+            return d.key[3];
+        })
+        .colors(genderColors)
         .dimension(experienceDim)
         .group(experienceSalaryGroup)
         .margins({top: 10, right: 50, bottom: 75, left: 75});
